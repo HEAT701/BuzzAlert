@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Send Reminder</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background: #0d1224;
+    color: white;
+    margin: 0;
+}
+.container{
+    width: 90%;
+    max-width: 400px;
+    margin: 50px auto;
+    background: #1b2340;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+input, textarea{
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: none;
+    outline: none;
+}
+button{
+    width: 100%;
+    padding: 12px;
+    background: #4f7cff;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    margin-top: 15px;
+    cursor: pointer;
+}
+button:hover{
+    background: #335fe0;
+}
+.success, .error{
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+}
+.success{ background: #22c55e; }
+.error{ background: #ef4444; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Send Reminder</h2>
+
+    <input type="text" id="phone" placeholder="Enter Phone Number">
+
+    <input type="text" id="title" placeholder="Title">
+
+    <textarea id="message" rows="4" placeholder="Enter Message"></textarea>
+
+    <button onclick="sendMessage()">Send</button>
+
+    <div class="success" id="successBox"></div>
+    <div class="error" id="errorBox"></div>
+</div>
+<script>
+async function sendMessage() {
+  const phone = document.getElementById('phone').value.trim();
+  const title = document.getElementById('title').value.trim();
+  const messages = document.getElementById('message').value.trim();
+
+  const successBox = document.getElementById('successBox');
+  const errorBox = document.getElementById('errorBox');
+
+  successBox.style.display = "none";
+  errorBox.style.display = "none";
+
+  if (!phone || !messages) {
+    errorBox.innerText = "Phone and message are required!";
+    errorBox.style.display = "block";
+    return;
+  }
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/reminders/create/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(AUTH_TOKEN ? { "Authorization": "Token " + AUTH_TOKEN } : {})
+      },
+      body: JSON.stringify({
+        phone: phone,
+        title: title,
+        messages: messages
+      })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      successBox.innerText = "Sent Successfully ✓";
+      successBox.style.display = "block";
+    } else {
+      errorBox.innerText = "Error: " + JSON.stringify(data);
+      errorBox.style.display = "block";
+    }
+  } catch (err) {
+    errorBox.innerText = "Network Error!";
+    errorBox.style.display = "block";
+    console.error(err);
+  }
+}
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BuzzAlert — Smart Reminder API</title>
+  <style>
+    :root{
+      --bg:#0f1226;
+      --panel:#0f1226;
+      --card:#0f1724cc;
+      --muted:#9aa3c7;
+      --accent:#4a6bff;
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --white: #ffffff;
+      --success: #25D366;
+      --glass-border: rgba(255,255,255,0.06);
+    }
+    /* Reset */
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background: linear-gradient(180deg,#071024 0%, #0b0e1a 100%);
+      color:var(--white);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.4;
+    }
+    a{color:inherit;text-decoration:none}
+    /* NAV */
+    nav{
+      display:flex;align-items:center;justify-content:space-between;padding:18px 6%;
+      position:sticky;top:0;background:transparent;z-index:50;
+    }
+    .logo{display:flex;align-items:center;gap:12px}
+    .logo .icon{
+      width:34px;height:34px;border-radius:8px;background:linear-gradient(90deg,#3b82f6,#06b6d4);
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:white;
+    }
+    .nav-right{display:flex;align-items:center;gap:12px}
+    .btn-ghost{padding:8px 14px;border-radius:8px;background:transparent;border:1px solid var(--glass-border);cursor:pointer}
+    .btn-primary{padding:10px 16px;border-radius:10px;background:var(--accent);border:none;color:white;cursor:pointer}
+    .darktoggle{padding:8px;border-radius:8px;background:transparent;border:1px solid var(--glass-border);cursor:pointer;color:var(--muted)}
+    /* HERO */
+    .hero{
+      display:flex;gap:40px;align-items:center;justify-content:space-between;padding:64px 6% 48px;
+    }
+    .hero-left{max-width:56%;animation:slideIn 900ms ease both}
+    .hero-left h1{font-size:44px;margin:0 0 18px;line-height:1.02}
+    .hero-left p{color:var(--muted);font-size:16px;margin:0 0 24px}
+    .hero-cta{display:flex;gap:14px}
+    .hero-cta .btn-primary{padding:12px 22px;font-weight:600}
+    .hero-cta .btn-outline{padding:12px 22px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--white)}
+    .hero-right{width:420px;display:flex;flex-direction:column;align-items:center;gap:18px;animation:float 3500ms ease-in-out infinite}
+    .device{
+      width:360px;height:640px;border-radius:28px;background:linear-gradient(180deg,#0b1226,#07102a);
+      border:6px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;padding:18px;
+      box-shadow: 0 30px 60px rgba(8,12,30,0.6), 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .device .screen{flex:1;background:#07102a;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;justify-content:flex-start}
+    .message-box{background: linear-gradient(90deg,#eef7ff11,#dbeaff08);padding:14px;border-radius:12px;display:flex;align-items:center;gap:12px}
+    .tick{width:36px;height:36px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#042007;font-weight:700}
+    /* FEATURES */
+    .features{padding:40px 6%;display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+    .feature-left{padding-right:20px}
+    .feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
+    .feature-card{background:var(--glass);border-radius:12px;padding:18px;border:1px solid var(--glass-border);display:flex;flex-direction:column;align-items:center;gap:10px}
+    .feature-card img{width:56px;height:56px;object-fit:contain}
+    .feature-card p{margin:0;color:var(--muted);text-align:center}
+    /* EXAMPLE API BOX */
+    .api-box{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:12px;border:1px solid var(--glass-border);margin-top:18px;color:#bfe0ff}
+    code{display:block;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;background:transparent;color:#9be7ff;padding:10px;border-radius:8px}
+    /* PRICING */
+    .pricing{padding:56px 6%;text-align:center}
+    .plans{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+    .plan{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:28px;border-radius:14px;width:280px;border:1px solid var(--glass-border);box-shadow:0 20px 40px rgba(2,6,23,0.6)}
+    .plan h3{margin:0 0 8px}
+    .price{font-size:34px;margin-bottom:10px}
+    .plan ul{list-style:none;padding:0;margin:8px 0;color:var(--muted)}
+    .plan button{margin-top:12px;padding:10px 16px;border-radius:10px;border:none;background:var(--accent);color:white;cursor:pointer}
+    /* CONTACT */
+    .contact{padding:40px 6%;display:flex;justify-content:center}
+    .contact form{background:var(--glass);padding:22px;border-radius:12px;border:1px solid var(--glass-border);width:100%;max-width:720px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .contact input,.contact textarea{padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--white)}
+    .contact textarea{grid-column:1/3;min-height:120px;resize:vertical}
+    .contact .submit{grid-column:2/3;justify-self:end;padding:12px 18px;border-radius:8px;border:none;background:var(--accent);color:white;cursor:pointer}
+    /* SENDER / Bulk Upload area */
+    .sender{padding:40px 6%;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+    .sender .form{background:var(--glass);padding:16px;border-radius:12px;border:1px solid var(--glass-border)}
+    .sender label{display:block;margin-bottom:6px;color:var(--muted)}
+    .sender input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--white)}
+    .dropzone{margin-top:12px;border:2px dashed rgba(255,255,255,0.04);padding:18px;border-radius:10px;text-align:center;color:var(--muted);cursor:pointer}
+    .preview{margin-top:12px;max-height:200px;overflow:auto;background:rgba(255,255,255,0.02);padding:10px;border-radius:8px}
+    .send-btn{margin-top:12px;padding:10px 14px;border-radius:8px;border:none;background:#22c55e;color:#042007;cursor:pointer}
+    /* FOOTER */
+    footer{padding:26px 6%;text-align:center;background:linear-gradient(180deg,#07102a 0%, #08132a 100%);margin-top:30px;color:var(--muted)}
+    /* Floating WhatsApp */
+    .whatsapp{position:fixed;right:20px;bottom:20px;background:var(--success);color:#042007;padding:14px;border-radius:50%;font-size:22px;text-decoration:none;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(2,6,23,0.5)}
+    /* small screens */
+    @media (max-width:900px){
+      .hero{flex-direction:column-reverse;padding:40px 6%}
+      .hero-left{max-width:100%}
+      .hero-right{width:100%}
+      .features{grid-template-columns:1fr}
+      .feature-grid{grid-template-columns:repeat(2,1fr)}
+      .contact form{grid-template-columns:1fr}
+      .sender{grid-template-columns:1fr}
+      .plans{flex-direction:column;gap:18px;align-items:center}
+    }
+    /* animations */
+    @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="logo">
+      <div class="icon">B</div>
+      <div>
+        <div style="font-weight:700">BuzzAlert</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:-4px">Reminder API</div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <button class="darktoggle" id="darkToggle">🌙 Dark</button>
+      <a href="#pricing" class="btn-ghost">Pricing</a>
+      <a href="#send" class="btn-ghost">Send</a>
+      <a href="#contact" class="btn-primary">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-left">
+      <h1>Send Automatic Reminders in 1 Click — No Coding Required</h1>
+      <p>SMS, WhatsApp, Email reminders automatically भेजें — Billing, Fees, Appointments, Due Dates सब auto हो जाएगा।</p>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="scrollToSection('#send')">Start Free</button>
+        <button class="btn-outline" onclick="scrollToSection('#pricing')">See Pricing</button>
+      </div>
+
+      <div class="api-box" style="margin-top:20px;">
+        <strong>Example:</strong>
+        <code>
+POST /api/reminders/create/
+Content-Type: application/json
+
+{
+  "phone": "+919876543210",
+  "title": "Fee Reminder",
+  "message": "Your fee is due today"
+}
+        </code>
+      </div>
+    </div>
+
+    <div class="hero-right" aria-hidden="true">
+      <div style="text-align:center;color:var(--muted);font-weight:600;margin-bottom:6px">Reminder Preview</div>
+      <div class="device">
+        <div class="screen">
+          <div class="message-box">
+            <div class="tick">✓</div>
+            <div>
+              <div style="font-weight:700">Your fee</div>
+              <div style="color:var(--muted);font-size:13px">is due today</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:8px">
+            <div style="width:12px;height:12px;background:var(--accent);border-radius:50%"></div>
+            <div style="width:12px;height:12px;background:#6ee7b7;border-radius:50%"></div>
+            <div style="width:12px;height:12px;background:#c7c7d9;border-radius:50%"></div>
+          </div>
+
+          <div style="flex:1"></div>
+
+          <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+            <div style="font-size:12px;color:var(--muted)">Auto-sent by BuzzAlert</div>
+            <div style="font-size:12px;color:var(--muted)">Now</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center;color:var(--muted);font-size:13px;margin-top:8px">Integrates with Twilio, WhatsApp Cloud & Email providers</div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="feature-left">
+      <h2 style="margin:0;font-size:28px">Top Features</h2>
+      <p style="color:var(--muted);margin-top:8px">Everything you need to automate reminders with minimal setup.</p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <img src="assets/feature1.png" alt="API" />
+          <strong>Fast API Integration</strong>
+          <p>Easily call a POST endpoint to send reminders.</p>
+        </div>
+
+        <div class="feature-card">
+          <img src="assets/feature2.png" alt="WhatsApp" />
+          <strong>WhatsApp + SMS Support</strong>
+          <p>Send via Twilio / WhatsApp Cloud / SMS providers.</p>
+        </div>
+
+        <div class="feature-card">
+          <img src="assets/feature3.png" alt="Scheduler" />
+          <strong>Auto-Scheduling</strong>
+          <p>Schedule reminders for future dates and recurring jobs.</p>
+        </div>
+
+        <div class="feature-card">
+          <img src="assets/feature4.png" alt="Analytics" />
+          <strong>Dashboard Analytics</strong>
+          <p>See deliveries, opens and status for each reminder.</p>
+        </div>
+
+        <div class="feature-card">
+          <img src="assets/feature5.png" alt="Secure" />
+          <strong>Secure & Reliable</strong>
+          <p>API keys, rate limits and secure webhooks.</p>
+        </div>
+
+        <div class="feature-card">
+          <img src="assets/feature6.png" alt="Dev" />
+          <strong>Developer Friendly</strong>
+          <p>Clear docs, SDKs, and Postman collections.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding-left:20px">
+      <div style="background:var(--glass);padding:18px;border-radius:12px;border:1px solid var(--glass-border)">
+        <h3 style="margin:0 0 8px">Use Cases</h3>
+        <ul style="color:var(--muted);margin:0;padding-left:18px;line-height:1.6">
+          <li>Coaching center fee reminders</li>
+          <li>Shop billing reminders</li>
+          <li>Appointment reminders (clinics, salons)</li>
+          <li>Subscription renewal reminders</li>
+          <li>Custom campaign messages</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:18px" class="api-box">
+        <strong>Developer Quick Start</strong>
+        <p style="color:var(--muted);margin:6px 0 0">Use your API key in Authorization header and POST to <code>/api/reminders/create/</code></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="pricing" id="pricing">
+    <h2 style="margin:0;font-size:34px">Simple Pricing</h2>
+    <p style="color:var(--muted);margin-top:8px">Start free — upgrade as your usage grows.</p>
+
+    <div class="plans" role="list">
+      <div class="plan" role="listitem">
+        <h3>Free</h3>
+        <div class="price">₹0 <div style="font-size:13px;color:var(--muted);margin-top:-6px">50 reminders / month</div></div>
+        <ul>
+          <li>Instant API</li>
+          <li>Twilio • WhatsApp • SMS</li>
+          <li>No server required</li>
+          <li>Basic analytics</li>
+        </ul>
+        <button onclick="purchase('free')">Get Started</button>
+      </div>
+
+      <div class="plan" role="listitem">
+        <h3>Pro</h3>
+        <div class="price">₹499 <div style="font-size:13px;color:var(--muted);margin-top:-6px">500 reminders / month</div></div>
+        <ul>
+          <li>All Free features</li>
+          <li>Priority queue</li>
+          <li>Webhook support</li>
+          <li>Detailed analytics</li>
+        </ul>
+        <button onclick="purchase('pro')">Get Started</button>
+      </div>
+
+      <div class="plan" role="listitem">
+        <h3>Business</h3>
+        <div class="price">₹999 <div style="font-size:13px;color:var(--muted);margin-top:-6px">2000 reminders / month</div></div>
+        <ul>
+          <li>All Pro features</li>
+          <li>Dedicated support</li>
+          <li>SLA & higher throughput</li>
+          <li>Account manager</li>
+        </ul>
+        <button onclick="purchase('business')">Get Started</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SENDER (single + bulk / CSV) -->
+  <section class="sender" id="send">
+    <div class="form">
+      <h3 style="margin-top:0">Send Reminder (Single)</h3>
+      <label>Mobile Number (with country code)</label>
+      <input id="singlePhone" placeholder="+919876543210" />
+      <label>Title</label>
+      <input id="singleTitle" placeholder="Payment Reminder" />
+      <label>Message</label>
+      <input id="singleMessage" placeholder="Your fee is due today" />
+      <button class="send-btn" onclick="sendSingle()">Send Now</button>
+      <div id="singleResult" style="margin-top:10px;color:var(--muted)"></div>
+    </div>
+
+    <div class="form">
+      <h3 style="margin-top:0">Bulk Upload (CSV)</h3>
+      <p style="color:var(--muted);margin:0">CSV format: <code>phone,title,message</code></p>
+
+      <div id="dropzone" class="dropzone">
+        Drag & drop CSV here or click to select file
+        <input id="csvFile" type="file" accept=".csv" style="display:none" />
+      </div>
+
+      <div class="preview" id="csvPreview">No file loaded</div>
+      <button class="send-btn" onclick="sendBulk()">Send Bulk</button>
+      <div id="bulkResult" style="margin-top:10px;color:var(--muted)"></div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <form id="contactForm" onsubmit="submitContact(event)">
+      <input type="text" id="cname" placeholder="Your name" required />
+      <input type="email" id="cemail" placeholder="Your email" required />
+      <textarea id="cmsg" placeholder="How can we help?"></textarea>
+      <button class="submit">Send Message</button>
+    </form>
+  </section>
+
+  <a class="whatsapp" href="https://wa.me/918888888888" target="_blank" aria-label="Chat on WhatsApp">💬</a>
+
+  <footer>
+    <div style="max-width:900px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <strong>BuzzAlert</strong><div style="font-size:12px;color:var(--muted)">Automated Reminders</div>
+        </div>
+        <div style="color:var(--muted)">© 2025 BuzzAlert • Terms • Privacy</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // === Simple helpers & settings ===
+    const API_URL = 'http://127.0.0.1:8000/reminders/create/'; // change to your backend endpoint
+    const AUTH_TOKEN = ''; // if you use Token JWT set here
+
+    function scrollToSection(sel){
+      document.querySelector(sel).scrollIntoView({behavior:'smooth'});
+    }
+
+    // Dark mode toggle (simple)
+    const darkToggle = document.getElementById('darkToggle');
+    darkToggle.addEventListener('click', ()=>{
+      document.body.classList.toggle('dark');
+      darkToggle.textContent = document.body.classList.contains('dark') ? '☀️ Light' : '🌙 Dark';
+    });
+
+    // Purchase (placeholder)
+    function purchase(plan){
+      alert('Selected plan: ' + plan + '\\nThis will open billing flow (implement on server).');
+      // Redirect to checkout / payment flow
+    }
+
+    // === Single send ===
+    async function sendSingle(){
+      const phone = document.getElementById('singlePhone').value.trim();
+      const title = document.getElementById('singleTitle').value.trim();
+      const message = document.getElementById('singleMessage').value.trim();
+      const out = document.getElementById('singleResult');
+      if(!phone || !message){ out.textContent = 'Phone and message required'; return; }
+
+      out.textContent = 'Sending...';
+      try{
+        const res = await fetch(API_URL, {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            ...(AUTH_TOKEN?{ 'Authorization': 'Token ' + AUTH_TOKEN }:{})
+          },
+          body: JSON.stringify({ phone_number, title, message })
+        });
+        const data = await res.json();
+        if(res.ok){
+          out.textContent = 'Sent ✅ ' + (data.sid || data.message || 'Success');
+        } else {
+          out.textContent = 'Error: ' + (data.detail || JSON.stringify(data));
+        }
+      }catch(err){
+        out.textContent = 'Network error';
+      }
+    }
+
+    // === CSV Drag & Drop ===
+    const dropzone = document.getElementById('dropzone');
+    const csvInput = document.getElementById('csvFile');
+    const csvPreview = document.getElementById('csvPreview');
+    let CSV_ITEMS = [];
+
+    dropzone.addEventListener('click', ()=> csvInput.click());
+    csvInput.addEventListener('change', handleFiles);
+    dropzone.addEventListener('dragover', (e)=>{ e.preventDefault(); dropzone.style.borderColor = '#4a6bff'; });
+    dropzone.addEventListener('dragleave', ()=>{ dropzone.style.borderColor = 'rgba(255,255,255,0.04)'; });
+    dropzone.addEventListener('drop', (e)=>{ e.preventDefault(); dropzone.style.borderColor='rgba(255,255,255,0.04)'; const f = e.dataTransfer.files[0]; csvInput.files = e.dataTransfer.files; handleFiles(); });
+
+    function handleFiles(){
+      const f = csvInput.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = (ev)=>{
+        const text = ev.target.result;
+        parseCSV(text);
+      };
+      reader.readAsText(f);
+    }
+
+    function parseCSV(text){
+      const lines = text.split(/\\r?\\n/).filter(Boolean);
+      const items = [];
+      for(let i=0;i<lines.length;i++){
+        const cols = lines[i].split(',');
+        // Expect phone,title,message (if only phone present allowed)
+        const phone = (cols[0]||'').trim();
+        const title = (cols[1]||'').trim();
+        const message = (cols.slice(2).join(',')||'').trim();
+        if(phone) items.push({phone,title,message});
+      }
+      CSV_ITEMS = items;
+      renderPreview();
+    }
+
+    function renderPreview(){
+      if(CSV_ITEMS.length===0){ csvPreview.innerText = 'No rows parsed'; return; }
+      csvPreview.innerHTML = '<strong>Preview ('+CSV_ITEMS.length+' rows)</strong><br/><table style="width:100%;border-collapse:collapse"><tbody>';
+      CSV_ITEMS.slice(0,50).forEach((r,idx)=>{
+        csvPreview.innerHTML += '<tr style="border-bottom:1px solid rgba(255,255,255,0.03)"><td style="padding:6px 8px;width:20%">'+(idx+1)+'</td><td style="padding:6px 8px;width:30%">'+escapeHTML(r.phone)+'</td><td style="padding:6px 8px">'+escapeHTML(r.title || '')+'</td><td style="padding:6px 8px;color:var(--muted)">'+escapeHTML(r.message || '')+'</td></tr>';
+      });
+      csvPreview.innerHTML += '</tbody></table>';
+    }
+
+    // === Bulk send ===
+    async function sendBulk(){
+      const out = document.getElementById('bulkResult');
+      if(!CSV_ITEMS || CSV_ITEMS.length===0){ out.textContent = 'No CSV items to send'; return; }
+      out.textContent = 'Sending '+CSV_ITEMS.length+' messages...';
+      let success = 0, fail = 0;
+      // Send sequentially or batch - for demo we do sequential with small delay to avoid rate-limits
+      for(let i=0;i<CSV_ITEMS.length;i++){
+        const item = CSV_ITEMS[i];
+        try {
+          const res = await fetch(API_URL, {
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json',
+              ...(AUTH_TOKEN?{ 'Authorization': 'Token ' + AUTH_TOKEN }:{})
+            },
+            body: JSON.stringify({ phone: item.phone, title: item.title, message: item.message })
+          });
+          const data = await res.json();
+          if(res.ok) success++; else fail++;
+        } catch(e){ fail++; console.error(e); }
+        // small throttle
+        await new Promise(r=>setTimeout(r, 250));
+      }
+      out.textContent = 'Done. Success: '+success+' Fail: '+fail;
+    }
+
+    // Contact submit
+    async function submitContact(e){
+      e.preventDefault();
+      const name = document.getElementById('cname').value.trim();
+      const email = document.getElementById('cemail').value.trim();
+      const msg = document.getElementById('cmsg').value.trim();
+      // Send to your contact endpoint or to email service
+      alert('Thanks '+name+', we received your message. (Demo only)');
+    }
+
+    // small helper
+    function escapeHTML(s){ if(!s) return ''; return s.replace(/[&<>"']/g, (c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    // Accessibility: smooth scroll for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', (e)=>{ e.preventDefault(); const t = a.getAttribute('href'); if(t!=='#') scrollToSection(t); });
+    });
+
+    // Initial small demo CSV example if you want
+    // CSV_ITEMS = [{phone:"+919876543210",title:"Fee",message:"Please pay"},{phone:"+919812345678",title:"Due",message:"Payment due"}];
+    // renderPreview();
+
+  </script>
+</body>
+</html>
